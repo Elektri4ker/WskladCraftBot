@@ -19,6 +19,13 @@ class Resources(DataBaseProxy):
     def getResource(name):
         return db.Resources.find_one({'name': name})
 
+    def getAll():
+        a_res = []
+        for res in db.Resources.find():
+            a_res.append(res)
+
+        return a_res
+
 class Users(DataBaseProxy):
     def getUserStock(name, user_stock):
         user = db.Users.find_one('name')

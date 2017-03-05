@@ -2,15 +2,15 @@
 
 import config
 import stock_parser
+import * from database_proxy
 
 class Stock:
 
-    def __init__(self, db, stock_parser = StockParser()):
-        self.db = db
+    def __init__(self, stock_parser = StockParser()):
         self.stock_parser = stock_parser
 
 
-    def processMessageFromDwarfs(self, bot, tg_message, resources, new_resources)
+    def processMessageFromDwarfs(self, tg_message, resources, new_resources, updated_resources)
         #is it actually from the right bot?
         if tg_message.forward_from.username != Config.cw_bot_username:
             return false
@@ -23,16 +23,16 @@ class Stock:
         if len(found_resources) == 0:
             return false
 
+        new_resources = []
+        updated_resources = []
+        resources = []
         for res in found_resources:
-            doc_existinig_resource = self.db.Resources.find_one({'name': res['name']})
-            if not doc_existinig_resource:
-                doc_new_resource = {}
+            result = Resources.resetResource(res['name'], res['cost'])
+            if result == 2:
+                new_resources.append(res)
+            if result == 1:
+                updated_resources.append(res)
 
-
-
-
-
-
-
+            resources.append(res)
 
         return true

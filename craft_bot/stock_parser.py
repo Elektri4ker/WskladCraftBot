@@ -1,13 +1,18 @@
 # -*- coding: utf-8 -*-
 
 import re
+from config import Config
 
 class StockParser:
     def __init__(self):
         #regex for string like this:
         #/s_101 Нитки (106) x 2💰
         #use http://pythex.org/ to compose and check regex'es
-        self.re_resource = re.compile(r'^/s.+?\s(.+)\s\((\d+)\)\sx\s(\d+)')
+        self.dwarfs_parser = re.compile(r'^/s.+?\s(.+)\s\((\d+)\)\sx\s(\d+)')
+
+        #this one matches for strings like this:
+        #Шкура животного (5)
+        self.simple_parser = re.compile(r'^(.+)\s\((\d+)\)')
 
     def parseMessageFromDwarfs(self, text):
 
@@ -16,15 +21,37 @@ class StockParser:
         found_resources = []
 
         for entry in entries:
-            m = self.re_resource.match(entry)
+            m = self.dwarfs_parser.match(entry)
             if not m or len(m.groups()) != 3:
                 continue
 
             found_resource = {}
 
-            found_resource['name'] = m.group(1)
+            name = m.group(1)
+            if name in Config.abbreviation_mapping:
+                name = Config.abbreviation_mapping[name]
+
+            found_resource['name'] = name
             found_resource['count'] = int(m.group(2))
             found_resource['cost'] = int(m.group(3))
+
+            found_resources.append(found_resource)
+
+        return found_resources
+
+    def parseSimpleMessage(self, text):
+        entries = text.split("\n")
+
+        found_resources = []
+
+        for entry in entries:
+            m = self.simple_parser.match(entry)
+            if not m or len(m.groups()) != 2:
+                continue
+
+            found_resource = {}
+            found_resource['name'] = m.group(1)
+            found_resource['count'] = int(m.group(2))
 
             found_resources.append(found_resource)
 
