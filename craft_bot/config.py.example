@@ -1,0 +1,3 @@
+class Config:
+    bot_token = 'TOKEN'
+    cw_bot_username = 'ChatWarsBot'
