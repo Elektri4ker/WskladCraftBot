@@ -1,36 +1,44 @@
 class DataBaseProxy:
     db = None
+
+    @staticmethod
     def setDb(db):
         DataBaseProxy.db = db
 
 class Resources(DataBaseProxy):
+
+    @staticmethod
     def resetResource(name, cost):
-        res = db.Resources.find_one({'name': name})
-        if !res:
-            db.Resources.insert_one({'name': name, 'cost': cost})
+        res = DataBaseProxy.db.Resources.find_one({'name': name})
+        if not res:
+            DataBaseProxy.db.Resources.insert_one({'name': name, 'cost': cost})
             return 2
 
         if res['cost'] != cost:
-            db.Resources.update_one({'name': name}, {'$set': {'cost': cost}})
+            DataBaseProxy.db.Resources.update_one({'name': name}, {'$set': {'cost': cost}})
             return 1
 
         return 0
 
+    @staticmethod
     def getResource(name):
-        return db.Resources.find_one({'name': name})
+        return DataBaseProxy.db.Resources.find_one({'name': name})
 
+    @staticmethod
     def getAll():
         a_res = []
-        for res in db.Resources.find():
+        for res in DataBaseProxy.db.Resources.find():
             a_res.append(res)
 
         return a_res
 
 class Users(DataBaseProxy):
-    def getUserStock(name, user_stock):
-        user = db.Users.find_one('name')
+
+    @staticmethod
+    def getUserStock(name, user_stock, unknown_res_names):
+        user = DataBaseProxy.db.Users.find_one('name')
         if not user:
-            raise "Trying to get stock from non-existing user"
+            return False
 
         unknown_res_names = []
         #add 'cost' field to all stock entries
@@ -41,4 +49,18 @@ class Users(DataBaseProxy):
             else:
                 stock_entry['cost'] = res['cost']
 
-        user_stock = user
+        user_stock = user['stock']
+        return True
+
+    @staticmethod
+    def resetUserStock(name, new_stock):
+        DataBaseProxy.db.Users.update({'name': name}, {'$set': {'stock': new_stock}}, True)
+
+    @staticmethod
+    def calcStockCost(user_stock):
+        cost = 0
+        for stock_entry in user_stock:
+            if user_res['cost']:
+                cost += stock_entry['cost']
+
+        return cost

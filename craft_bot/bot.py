@@ -16,7 +16,11 @@ bot.
 
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import logging
-import config
+from pymongo import MongoClient
+
+from config import Config
+from message_handlers import MsgHandlers
+from database_proxy import DataBaseProxy
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -44,6 +48,8 @@ def error(bot, update, error):
 
 
 def main():
+    MsgHandlers.initialize()
+    DataBaseProxy.setDb(MongoClient('localhost', 27017).test_database)
     # Create the EventHandler and pass it your bot's token.
     updater = Updater(Config.bot_token)
 
@@ -53,9 +59,10 @@ def main():
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("help", help))
+    dp.add_handler(CommandHandler("cost", MsgHandlers.calcCost))
 
     # on noncommand i.e message - echo the message on Telegram
-    dp.add_handler(MessageHandler(Filters.text, echo))
+    dp.add_handler(MessageHandler(Filters.text, MsgHandlers.plainMessage))
 
     # log all errors
     dp.add_error_handler(error)
