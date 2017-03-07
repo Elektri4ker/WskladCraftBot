@@ -24,15 +24,15 @@ class Stock:
         if len(found_resources) == 0:
             return False
 
-        new_resources = []
-        updated_resources = []
-        resources = []
         for res in found_resources:
+            #print(res)
             result = Resources.resetResource(res['name'], res['cost'])
             if result == 2:
                 new_resources.append(res)
             if result == 1:
                 updated_resources.append(res)
+
+            #print(', result = ', result)
 
             resources.append(res)
 
@@ -43,7 +43,6 @@ class Stock:
         if len(found_resources) == 0:
             return False
 
-        not_found_resources = []
         for res in found_resources:
             res_stored = Resources.getResource(res['name'])
             if (res_stored == None):

@@ -10,6 +10,7 @@ class Resources(DataBaseProxy):
     @staticmethod
     def resetResource(name, cost):
         res = DataBaseProxy.db.Resources.find_one({'name': name})
+        print(res)
         if not res:
             DataBaseProxy.db.Resources.insert_one({'name': name, 'cost': cost})
             return 2
@@ -36,11 +37,10 @@ class Users(DataBaseProxy):
 
     @staticmethod
     def getUserStock(name, user_stock, unknown_res_names):
-        user = DataBaseProxy.db.Users.find_one('name')
+        user = DataBaseProxy.db.Users.find_one({'name': name})
         if not user:
             return False
 
-        unknown_res_names = []
         #add 'cost' field to all stock entries
         for stock_entry in user['stock']:
             res = Resources.getResource(stock_entry['name'])
@@ -49,7 +49,9 @@ class Users(DataBaseProxy):
             else:
                 stock_entry['cost'] = res['cost']
 
-        user_stock = user['stock']
+        for stock_entry in user['stock']:
+            user_stock.append(stock_entry)
+
         return True
 
     @staticmethod
@@ -60,7 +62,7 @@ class Users(DataBaseProxy):
     def calcStockCost(user_stock):
         cost = 0
         for stock_entry in user_stock:
-            if user_res['cost']:
-                cost += stock_entry['cost']
+            if 'cost' in stock_entry:
+                cost += stock_entry['cost'] * stock_entry['count']
 
         return cost

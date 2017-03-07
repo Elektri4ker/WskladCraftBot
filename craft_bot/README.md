@@ -1,4 +1,4 @@
-# Setting up a project
+## Setting up a project
 
 0. Install Python 2.7 and pip
 
@@ -18,4 +18,13 @@ pip install python-telegram-bot --upgrade
 3. Install 'pymongo'
 ```
 pip install pymongo
+```
+
+## Configure bot
+- rename file `config.py.example` to `config.py`
+- Insert your bot's actual token in the `bot_token` config entry 
+
+## Run bot!
+```
+python bot.py
 ```
