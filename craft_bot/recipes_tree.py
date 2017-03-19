@@ -12,9 +12,14 @@ def gtr_node_tree(graph, parent_node_name):
 
 class RecipesTree:
 
-    def __init__(self):
+    def __init__(self, recipes_dict):
         self.graph = nx.DiGraph()
-        self.mpgraph = nx.DiGraph()
+        self.create_graph_from_dict(recipes_dict)
+
+    def create_graph_from_dict(self, recipes_dict):
+        for rec_name, ingredients in recipes_dict.items():
+            for ing_name, count in ingredients.items():
+                self.graph.add_weighted_edges_from([(rec_name, ing_name, count)])
 
     def get_resource_counted(self, parent_node_list):
         #Extract a subgraph which consists of nodes_of_interest
@@ -33,63 +38,8 @@ class RecipesTree:
         #Walk around nodes in topologic order to count resources.
         for node in parent_node_list:
             for predc_node, succ_node, edge in gtr_node_tree(counted_graph, node):
-                ct = counted_graph.node[succ_node].get('count', 0)
-                ct += counted_graph.node[predc_node]['count'] * edge['weight']
-                counted_graph.node[succ_node]['count'] = ct
+                need_count = counted_graph.node[succ_node].get('count', 0)
+                need_count += counted_graph.node[predc_node]['count'] * edge['weight']
+                counted_graph.node[succ_node]['count'] = need_count
 
         return counted_graph
-
-
-    @staticmethod
-    def multiply_successor_resources_count(graph, parent_node_name, scale):
-        for successor in graph.successors(parent_node_name):
-            graph.edge[parent_node_name][successor]['weight'] *= scale
-            RecipesTree.multiply_successor_resources_count(graph, successor, graph.edge[parent_node_name][successor]['weight'])
-
-    def create_graph_from_dict(self, recipes_dict):
-        for rec_name, ingredients in recipes_dict.items():
-            for ing_name, count in ingredients.items():
-                self.graph.add_weighted_edges_from([(rec_name, ing_name, count)])
-
-    def create_multiplied_graph(self):
-        self.mpgraph = copy.deepcopy(self.graph)
-        root_nodes = [node for node in self.mpgraph.node if self.mpgraph.predecessors(node) > 0]
-        for root_node in root_nodes:
-            RecipesTree.multiply_successor_resources_count(self.mpgraph, root_node, 1)
-
-
-
-
-rec = {
-    "Сталь": {
-            "Порошок": 3,
-            "Железная руда": 3
-    },
-
-    "Металлическое волокно": {
-        "Стальная нить": 9,
-        "Серебряная руда":6
-    },
-
-    "Стальная нить": {
-        "Нитки": 10,
-        "Сталь": 1
-    }
-}
-
-import matplotlib.pyplot as plt
-from pprint import pprint
-g = RecipesTree()
-g.create_graph_from_dict(rec)
-
-rc = g.get_resource_counted(["Металлическое волокно"])
-
-pprint(rc.nodes(data=True))
-
-
-# nx.draw_networkx(g, pos=nx.spring_layout(g))
-# nx.draw_networkx_edge_labels(g, pos=nx.spring_layout(g))
-# plt.savefig("path.png")
-
-
-
