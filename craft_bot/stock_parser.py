@@ -18,41 +18,35 @@ class StockParser:
 
         entries = text.split("\n")
 
-        found_resources = []
+        found_resources = {}
 
         for entry in entries:
             m = self.dwarfs_parser.match(entry)
             if not m or len(m.groups()) != 3:
                 continue
 
-            found_resource = {}
-
             name = m.group(1)
             if name in Config.abbreviation_mapping:
                 name = Config.abbreviation_mapping[name]
 
-            found_resource['name'] = name
-            found_resource['count'] = int(m.group(2))
-            found_resource['cost'] = int(m.group(3))
-
-            found_resources.append(found_resource)
+            found_resources[name] = {}
+            found_resources[name]['count'] = int(m.group(2))
+            found_resources[name]['cost'] = int(m.group(3))
 
         return found_resources
 
     def parseSimpleMessage(self, text):
         entries = text.split("\n")
 
-        found_resources = []
+        found_resources = {}
 
         for entry in entries:
             m = self.simple_parser.match(entry)
             if not m or len(m.groups()) != 2:
                 continue
 
-            found_resource = {}
-            found_resource['name'] = m.group(1)
-            found_resource['count'] = int(m.group(2))
-
-            found_resources.append(found_resource)
+            name = m.group(1)
+            found_resources[name] = {}
+            found_resources[name]['count'] = int(m.group(2))
 
         return found_resources

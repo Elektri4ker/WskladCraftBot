@@ -13,6 +13,25 @@ class MsgHandlers:
         MsgHandlers.stock = Stock()
         MsgHandlers.recipes = Recipes(Config.recipes_file)
 
+    def _handle_user_resources(self, update):
+        user_stock = []
+        unknown_res_names = []
+
+        if not Users.getUserStock(update.message.from_user.username, user_stock, unknown_res_names):
+            update.message.reply_text('Вы еще не отправили свой /stock')
+            return
+
+        if len(unknown_res_names) != 0:
+            str_res = ""
+            for res in unknown_res_names:
+                str_res += res + '\n'
+            rpl = u'У нас нет информации о стоимости следующих ресурсов:\n' + \
+                str_res + \
+                u'Вы можете переслать сообщение от скупщика ресурсов, чтобы добавить цены в нашу базу!'
+            update.message.reply_text(rpl)
+
+        return user_stock, unknown_res_names
+
     @staticmethod
     def plainMessage(bot, update):
         resources = []
@@ -70,20 +89,7 @@ class MsgHandlers:
 
     @staticmethod
     def calcCost(bot, update):
-        user_stock = []
-        unknown_res_names = []
-        if not Users.getUserStock(update.message.from_user.username, user_stock, unknown_res_names):
-            update.message.reply_text('Вы еще не отправили свой /stock')
-            return
-
-        if len(unknown_res_names) != 0:
-            str_res = ""
-            for res in unknown_res_names:
-                str_res += res + '\n'
-            rpl = u'У нас нет информации о стоимости следующих ресурсов:\n' + \
-                str_res + \
-                u'Вы можете переслать сообщение от скупщика ресурсов, чтобы добавить цены в нашу базу!'
-            update.message.reply_text(rpl)
+        user_stock, unknown_res_names = MsgHandlers._handle_user_resources(update)
 
         cost = Users.calcStockCost(user_stock)
         update.message.reply_text(u'Стоимость вашего /stock = ' + str(cost))
@@ -111,4 +117,6 @@ class MsgHandlers:
                 rpl += i + "\n"
 
             update.message.reply_text(rpl)
-
+        #/craft <itemname> command
+        else:
+            user_stock, unknown_res_names = MsgHandlers._handle_user_resources(update)

@@ -28,22 +28,16 @@ class StockParserTest(unittest.TestCase):
         found_resources = self.stock_parser.parseSimpleMessage(self.validtextsimple)
 
         #assert
-        self.assertEqual(found_resources[0]['name'], 'Нитки')
-        self.assertEqual(found_resources[0]['count'], 106)
-
-        self.assertEqual(found_resources[1]['name'], 'Алюминиевая руда')
-        self.assertEqual(found_resources[1]['count'], 26)
+        self.assertEqual(found_resources['Нитки']['count'], 106)
+        self.assertEqual(found_resources['Алюминиевая руда']['count'], 26)
 
     def test_parseSimpleMessage_validtextadvanced(self):
         #act
         found_resources = self.stock_parser.parseSimpleMessage(self.validtextadvancedsimple)
 
         #assert
-        self.assertEqual(found_resources[0]['name'], '🗃Сундучок')
-        self.assertEqual(found_resources[0]['count'], 4)
-
-        self.assertEqual(found_resources[1]['name'], 'Плотная ткань')
-        self.assertEqual(found_resources[1]['count'], 8)
+        self.assertEqual(found_resources['🗃Сундучок']['count'], 4)
+        self.assertEqual(found_resources['Плотная ткань']['count'], 8)
 
     def test_parseSimpleMessage_invalidtext(self):
         #act
@@ -56,26 +50,22 @@ class StockParserTest(unittest.TestCase):
         found_resources = self.stock_parser.parseMessageFromDwarfs(self.validtext)
 
         #assert
-        self.assertEqual(found_resources[0]['name'], 'Нитки')
-        self.assertEqual(found_resources[0]['count'], 106)
-        self.assertEqual(found_resources[0]['cost'], 2)
+        self.assertEqual(found_resources['Нитки']['count'], 106)
+        self.assertEqual(found_resources['Нитки']['cost'], 2)
 
-        self.assertEqual(found_resources[1]['name'], Config.abbreviation_mapping['Алюм.руда'])
-        self.assertEqual(found_resources[1]['count'], 26)
-        self.assertEqual(found_resources[1]['cost'], 15)
+        self.assertEqual(found_resources[Config.abbreviation_mapping['Алюм.руда']]['count'], 26)
+        self.assertEqual(found_resources[Config.abbreviation_mapping['Алюм.руда']]['cost'], 15)
 
     def test_parseMessageFromDwarfs_validtextadvanced(self):
         #act
         found_resources = self.stock_parser.parseMessageFromDwarfs(self.validtextadvanced)
 
         #assert
-        self.assertEqual(found_resources[0]['name'], '🗃Сундучок')
-        self.assertEqual(found_resources[0]['count'], 4)
-        self.assertEqual(found_resources[0]['cost'], 1)
+        self.assertEqual(found_resources['🗃Сундучок']['count'], 4)
+        self.assertEqual(found_resources['🗃Сундучок']['cost'], 1)
 
-        self.assertEqual(found_resources[1]['name'], 'Плотная ткань')
-        self.assertEqual(found_resources[1]['count'], 8)
-        self.assertEqual(found_resources[1]['cost'], 4)
+        self.assertEqual(found_resources['Плотная ткань']['count'], 8)
+        self.assertEqual(found_resources['Плотная ткань']['cost'], 4)
 
     def test_parseMessageFromDwarfs_invalidtext(self):
         #act
