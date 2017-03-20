@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from telegram.ext import Updater
+from config import Config
 from stock import Stock
+from recipes import Recipes
 from database_proxy import *
 
 class MsgHandlers:
@@ -9,6 +11,7 @@ class MsgHandlers:
     @staticmethod
     def initialize():
         MsgHandlers.stock = Stock()
+        MsgHandlers.recipes = Recipes(Config.recipes_file)
 
     @staticmethod
     def plainMessage(bot, update):
@@ -84,3 +87,28 @@ class MsgHandlers:
 
         cost = Users.calcStockCost(user_stock)
         update.message.reply_text(u'Стоимость вашего /stock = ' + str(cost))
+
+    @staticmethod
+    def getCraftRecipes(bot, update):
+        recipe_item = update.message.text.split(' ')[1:]
+        recipe_item = ' '.join(recipe_item)
+
+        #just `/craft` command
+        if len(recipe_item) == 0:
+            weapon_list, intermediate_list = MsgHandlers.recipes.list_all()
+            rpl = "Доступный крафт (снаряжение):\n"
+            for w in weapon_list:
+                weap_str = f"{w[0]} ("
+                if 'attack' in w[1]['stat']:
+                    weap_str += f"⚔️{w[1]['stat']['attack']}"
+                if 'def' in w[1]['stat']:
+                    weap_str += f"🛡️{w[1]['stat']['def']}"
+                weap_str += ")\n"
+                rpl += weap_str
+
+            rpl += "\nДоступный крафт (промежуточные ресурсы)\n"
+            for i in intermediate_list:
+                rpl += i + "\n"
+
+            update.message.reply_text(rpl)
+

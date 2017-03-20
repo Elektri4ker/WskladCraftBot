@@ -54,7 +54,7 @@ class RecipesTree:
                 available_count = counted_graph.node[succ_node].get('available', 0) + user_resources_list.get(succ_node, 0)
 
                 need_count += counted_graph.node[predc_node]['count'] * edge['weight']
-                available_count += counted_graph.node[predc_node]['available'] * edge['weight']
+                available_count += min(counted_graph.node[predc_node]['available'] * edge['weight'], need_count)
 
                 counted_graph.node[succ_node]['count'] = need_count
                 counted_graph.node[succ_node]['available'] = available_count
@@ -111,9 +111,9 @@ if __name__ == '__main__':
     rt = RecipesTree(recipes)
     weapons, intermediate = rt.get_available_craft()
 
-    #pprint(weapons)
-    #pprint(intermediate)
+    pprint(weapons)
+    pprint(intermediate)
 
-    prim, base = rt.user_get_craft('Меч берсеркера', {})
+    prim, base = rt.user_get_craft('Меч берсеркера', {"Стальная заготовка": 999})
     pprint(prim)
     pprint(base)

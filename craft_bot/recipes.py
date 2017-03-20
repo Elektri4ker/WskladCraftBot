@@ -1,29 +1,16 @@
-from config import  Config
 import json
 import pprint
 import copy
+from recipes_tree import *
 import collections
 
 class Recipes:
     def __init__(self, file_recipes):
         with open(file_recipes) as f:
-            self.recipes = self.dict2counted(json.load(f))
+            self.recipes_tree = RecipesTree(json.load(f))
 
-    @staticmethod
-    def dict2counted(d):
-        c = {}
-        for key, value in d.items():
-            c[key] = collections.Counter(value)
-        return c
-
-    def tree_expand(self, recipes):
-        for rec, ingredients in recipes.items():
-            for ingr in ingredients:
-                if ingr in recipes:
-                    ingr = (ingr, recipes[])
-
-    def all(self):
-        return self.recipes
+    def list_all(self):
+        return self.recipes_tree.get_available_craft()
 
     #returns resource list for which no any recipes
     def all_raw_recipes(self, res_list):
