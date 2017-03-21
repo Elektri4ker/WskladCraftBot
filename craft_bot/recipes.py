@@ -12,22 +12,16 @@ class Recipes:
     def list_all(self):
         return self.recipes_tree.get_available_craft()
 
+    def calc_recipe_for_user(self, recipe_name, user_stock):
+        return self.recipes_tree.user_get_craft(recipe_name, user_stock)
+
+
     #returns resource list for which no any recipes
     def all_raw_recipes(self, res_list):
         raw_res = []
-        for res in res_list:
-            if res not in self.recipes:
-                raw_res.append(res)
+
         return raw_res
 
-    def find_recipe(self, resource_name):
-        if resource_name not in self.recipes:
-            return None
-        else:
-            return self.recipes[resource_name]
-
-    def find_raw_recipe(self, resource_name):
-        raw_recipe = copy.deepcopy(self.find_recipe(resource_name))
 
 
 
