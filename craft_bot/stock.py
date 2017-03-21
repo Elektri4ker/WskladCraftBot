@@ -13,7 +13,7 @@ class Stock:
 
     def processMessageFromDwarfs(self, tg_message, resources, new_resources, updated_resources):
         #is it actually from the right bot?
-        if tg_message.forward_from == None or tg_message.forward_from.username != Config.cw_bot_username:
+        if not tg_message.forward_from or tg_message.forward_from.username != Config.cw_bot_username:
             return False
 
         #is it actually the message from Dwarfs?
@@ -24,30 +24,30 @@ class Stock:
         if len(found_resources) == 0:
             return False
 
-        for res in found_resources:
+        for res, props in found_resources.items():
             #print(res)
-            result = Resources.resetResource(res['name'], res['cost'])
+            result = Resources.resetResource(res, props['cost'])
             if result == 2:
-                new_resources.append(res)
+                new_resources[res] = props
             if result == 1:
-                updated_resources.append(res)
+                updated_resources[res] = props
 
             #print(', result = ', result)
 
-            resources.append(res)
+            resources[res] = props
 
         return True
 
-    def processSimpleMessage(self, tg_message, resources, not_found_resources):
+    def processSimpleMessage(self, tg_message, resources, not_found_resources_names):
         found_resources = self.stock_parser.parseSimpleMessage(tg_message.text)
         if len(found_resources) == 0:
             return False
 
-        for res in found_resources:
-            res_stored = Resources.getResource(res['name'])
-            if (res_stored == None):
-                not_found_resources.append(res)
+        for res, props in found_resources.items():
+            res_stored = Resources.getResource(res)
+            if res_stored is None:
+                not_found_resources_names.append(res)
 
-            resources.append(res)
+            resources[res] = props
 
         return True

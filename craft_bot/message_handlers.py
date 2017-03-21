@@ -13,8 +13,9 @@ class MsgHandlers:
         MsgHandlers.stock = Stock()
         MsgHandlers.recipes = Recipes(Config.recipes_file)
 
-    def _handle_user_resources(self, update):
-        user_stock = []
+    @staticmethod
+    def _handle_user_resources(update):
+        user_stock = {}
         unknown_res_names = []
 
         if not Users.getUserStock(update.message.from_user.username, user_stock, unknown_res_names):
@@ -34,48 +35,47 @@ class MsgHandlers:
 
     @staticmethod
     def plainMessage(bot, update):
-        resources = []
-        new_resources = []
-        updated_resources = []
+        resources = {}
+        new_resources = {}
+        updated_resources = {}
 
         if MsgHandlers.stock.processMessageFromDwarfs(update.message, resources, new_resources, updated_resources):
             #clear resources from 'cost' field
-            for res in resources:
-                if 'cost' in res: del res['cost']
+            for res, props in resources.items():
+                if 'cost' in props: del props['cost']
 
             Users.resetUserStock(update.message.from_user.username, resources)
             update.message.reply_text('Ура! Склад обновлен!')
-            bot.sendMessage(update.message.chat_id, 'Вы нашли новые ресурсы:\n')
 
             if len(new_resources) != 0:
                 str_res = ""
                 for res in new_resources:
-                    str_res += res['name'] + '\n'
+                    str_res += res + '\n'
                 bot.sendMessage(update.message.chat_id, u'Вы нашли новые ресурсы:\n' + str_res)
 
             if len(updated_resources) != 0:
                 str_res = ""
                 for res in updated_resources:
-                    str_res += res['name'] + '\n'
+                    str_res += res + '\n'
                 bot.sendMessage(update.message.chat_id, u'Вы нашли информацию о новых ценах на следующие ресурсы:\n' + str_res)
 
             return
 
-        resources = []
-        not_found_resources = []
+        resources = {}
+        not_found_resources_names = []
 
-        if MsgHandlers.stock.processSimpleMessage(update.message, resources, not_found_resources):
+        if MsgHandlers.stock.processSimpleMessage(update.message, resources, not_found_resources_names):
             #clear resources from 'cost' field
-            for res in resources:
-                if 'cost' in res: del res['cost']
+            for res, props in resources.items():
+                if 'cost' in props: del props['cost']
 
             Users.resetUserStock(update.message.from_user.username, resources)
             update.message.reply_text('Ура! Склад обновлен!')
 
-            if len(not_found_resources) != 0:
+            if len(not_found_resources_names) != 0:
                 str_res = ""
-                for res in not_found_resources:
-                    str_res += res['name'] + '\n'
+                for res in not_found_resources_names:
+                    str_res += res + '\n'
 
                 rpl = u'У нас нет информации о стоимости следующих ресурсов:\n' + \
                     str_res + \

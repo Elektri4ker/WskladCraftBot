@@ -41,16 +41,15 @@ class Users(DataBaseProxy):
         if not user:
             return False
 
-        #add 'cost' field to all stock entries
-        for stock_entry in user['stock']:
-            res = Resources.getResource(stock_entry['name'])
-            if not res:
-                unknown_res_names.append(stock_entry['name'])
-            else:
-                stock_entry['cost'] = res['cost']
+        user_stock.update(user['stock'])
 
-        for stock_entry in user['stock']:
-            user_stock.append(stock_entry)
+        #add 'cost' field to all stock entries
+        for stock_entry, props in user_stock.items():
+            res = Resources.getResource(stock_entry)
+            if not res:
+                unknown_res_names.append(stock_entry)
+            else:
+                props['cost'] = res['cost']
 
         return True
 
@@ -61,8 +60,8 @@ class Users(DataBaseProxy):
     @staticmethod
     def calcStockCost(user_stock):
         cost = 0
-        for stock_entry in user_stock:
-            if 'cost' in stock_entry:
-                cost += stock_entry['cost'] * stock_entry['count']
+        for stock_entry, props in user_stock.items():
+            if 'cost' in props:
+                cost += props['cost'] * props['count']
 
         return cost
