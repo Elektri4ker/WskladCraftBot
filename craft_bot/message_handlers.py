@@ -130,11 +130,11 @@ class MsgHandlers:
             user_stock_counted = {}
             for res, props in user_stock.items():
                 user_stock_counted[res] = props['count']
-            # try:
-            need_prim_resources, need_base_resources = MsgHandlers.recipes.calc_recipe_for_user(recipe_item, user_stock_counted)
-            # except Exception:
-            #     update.message.reply_text(f"Ресурса \"{recipe_item}\" не существует.")
-            #     return
+            try:
+                need_prim_resources, need_base_resources = MsgHandlers.recipes.calc_recipe_for_user(recipe_item, user_stock_counted)
+            except Exception:
+                update.message.reply_text(f"Ресурса \"{recipe_item}\" не существует.")
+                return
 
             rpl = ''
             rpl += "Требуется ресурсов для крафта:\n" \
