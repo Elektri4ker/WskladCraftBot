@@ -51,12 +51,21 @@ class RecipesTree:
             for predc_node, succ_node, edge in gtr_node_tree(counted_graph, node):
                 #check, if we already have any count for this successor node (if we had passed it before?)
                 need_count = counted_graph.node[succ_node].get('count', 0)
-                available_count = counted_graph.node[succ_node].get('available', 0) + user_resources_list.get(succ_node, 0)
 
                 need_count += counted_graph.node[predc_node]['count'] * edge['weight']
-                available_count += min(counted_graph.node[predc_node]['available'] * edge['weight'], need_count)
-
                 counted_graph.node[succ_node]['count'] = need_count
+
+                # Also we can have previously increased available count
+                available_count = counted_graph.node[succ_node].get('available', 0)# + user_resources_list.get(succ_node, 0)
+
+                # 'transfer' user resources to the node of the graph
+                available_from_predcessor = counted_graph.node[predc_node]['available'] * edge['weight']
+                available_count += available_from_predcessor
+                transfer_count = min(need_count - available_count, user_resources_list.get(succ_node, 0))
+                assert transfer_count >= 0, 'transfer_count should not be negative!'
+                if succ_node in user_resources_list:
+                    user_resources_list[succ_node] -= transfer_count
+                available_count += transfer_count
                 counted_graph.node[succ_node]['available'] = available_count
 
         return counted_graph

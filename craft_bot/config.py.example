@@ -3,6 +3,7 @@
 class Config:
     bot_token = 'TOKEN'
     cw_bot_username = 'ChatWarsBot'
+    recipes_file = 'recipes.json'
 
     abbreviation_mapping = {
     u'Алюм.руда': u'Алюминиевая руда',
@@ -11,5 +12,6 @@ class Config:
     u'Серебр.руда': u'Серебряная руда',
     u'Кост.пудра': u'Костяная пудра',
     u'Шкура': u'Шкура животного',
-    u'Кость': u'Кость животного'
+    u'Кость': u'Кость животного',
+    u'Метал.волокно': u'Металлическое волокно'
     }
