@@ -6,9 +6,10 @@ import collections
 #It's guaranteed that predcessor node will be returned first than any of its successors.
 #It will go CRASH if the graph would have cycles!!!
 def gtr_node_tree(graph, parent_node_name):
-    for successor in graph.successors(parent_node_name):
-        yield (parent_node_name, successor, graph.edge[parent_node_name][successor])
-        yield from gtr_node_tree(graph, successor)
+    for node in nx.topological_sort(graph):
+        for successor in graph.successors(node):
+            yield (node, successor, graph.edge[node][successor])
+
 
 
 class RecipesTree:
