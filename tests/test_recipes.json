@@ -1,0 +1,42 @@
+{
+    "testcase1": {
+        "recipes": {
+            "res0": {
+                "res1": 2,
+                "res2": 3,
+                "res6": 5
+            },
+
+            "res1": {
+                "res3": 2,
+                "res4": 2
+            },
+
+            "res2": {
+                "res1": 2,
+                "res4": 2
+            },
+
+            "res4": {
+                "res5": 3,
+                "res6": 3
+            }
+        },
+
+        "params": [
+            {
+                "in_user_stock": {},
+                "in_parent_nodes": ["res0"],
+                "out_graph_attrib": {
+                    "res0": {"count": 1, "available": 0},
+                    "res1": {"count": 8, "available": 0},
+                    "res2": {"count": 3, "available": 0},
+                    "res3": {"count": 16, "available": 0},
+                    "res4": {"count": 22, "available": 0},
+                    "res5": {"count": 66, "available": 0},
+                    "res6": {"count": 71, "available": 0}
+                }
+            }
+        ]
+    }
+}
