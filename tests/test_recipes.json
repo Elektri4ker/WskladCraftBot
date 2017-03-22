@@ -36,6 +36,20 @@
                     "res5": {"count": 66, "available": 0},
                     "res6": {"count": 71, "available": 0}
                 }
+            },
+
+            {
+                "in_user_stock": {"res1": 2, "res5": 4},
+                "in_parent_nodes": ["res0"],
+                "out_graph_attrib": {
+                    "res0": {"count": 1, "available": 0},
+                    "res1": {"count": 8, "available": 2},
+                    "res2": {"count": 3, "available": 0},
+                    "res3": {"count": 16, "available": 4},
+                    "res4": {"count": 22, "available": 4},
+                    "res5": {"count": 66, "available": 16},
+                    "res6": {"count": 71, "available": 12}
+                }
             }
         ]
     }
