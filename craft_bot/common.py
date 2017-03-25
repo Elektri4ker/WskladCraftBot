@@ -8,4 +8,5 @@ def find_dict(dict, func):
 #subtracts collection2 from collection1
 def subtract(collection1, collection2):
     for x in collection2:
-        collection1.remove(x)
+        if x in collection1:
+            collection1.remove(x)
