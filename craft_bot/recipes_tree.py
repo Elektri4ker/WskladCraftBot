@@ -93,15 +93,17 @@ class RecipesTree:
         need_prim_resources = {}
 
         for node, data in counted_graph.nodes(data=True):
+            if node == craft_item:
+                continue
+
             count = data['count']
             avail = data['available']
             need = max(0, count - avail)
 
-            if craft_item in counted_graph.predecessors(node):
-                need_prim_resources.update({node: {'need': need, 'count': count}})
-
             if len(counted_graph.successors(node)) <= 0:
                 need_base_resources.update({node: {'need': need, 'count': count}})
+            else:
+                need_prim_resources.update({node: {'need': need, 'count': count}})
 
         return need_prim_resources, need_base_resources
 

@@ -4,6 +4,7 @@ from config import Config
 from stock import Stock
 from recipes import Recipes
 from database_proxy import *
+from common import *
 
 from jinja2 import Environment, PackageLoader, select_autoescape
 
@@ -17,12 +18,22 @@ class MsgHandlers:
     recipes = None
     stock = None
     keyboard_markups = None
+    recipes_name_to_id_map = None
 
 
     @staticmethod
     def initialize():
         MsgHandlers.stock = Stock()
         MsgHandlers.recipes = Recipes(Config.recipes_file)
+
+        #map recipe names to some generated ID for ability to make a /craft_ID link
+        MsgHandlers.recipes_name_to_id_map = {}
+        weapon_list, intermediate_list = MsgHandlers.recipes.list_all()
+        all_list = []
+        all_list.extend([w[0] for w in weapon_list])
+        all_list.extend(intermediate_list)
+
+        MsgHandlers.recipes_name_to_id_map.update({all_list[i]: i for i in range(0, len(all_list))})
 
         MsgHandlers.keyboard_markups = {
             "main_menu": {
@@ -38,11 +49,29 @@ class MsgHandlers:
 
     @staticmethod
     def intro(bot, update):
-        keyboard_markup = {'keyboard': [["123"], ["456"]], 'resize_keyboard': True}
         bot.sendMessage(chat_id=update.message.chat_id,
                         parse_mode='Markdown',
                         text=env.get_template('intro.txt').render(),
                         reply_markup=MsgHandlers.keyboard_markups["main_menu"])
+
+    @staticmethod
+    def showCraftMenu(bot, update):
+        bot.sendMessage(chat_id=update.message.chat_id,
+                        parse_mode='Markdown',
+                        text=env.get_template('craft_menu.txt').render(),
+                        reply_markup=MsgHandlers.keyboard_markups["craft_menu"])
+
+    @staticmethod
+    def showGuidesMenu(bot, update):
+        bot.sendMessage(chat_id=update.message.chat_id,
+                        parse_mode='Markdown',
+                        text=env.get_template('guides_menu.txt').render())
+
+    @staticmethod
+    def showStatMenu(bot, update):
+        bot.sendMessage(chat_id=update.message.chat_id,
+                        parse_mode='Markdown',
+                        text=env.get_template('stat_menu.txt').render())
 
     @staticmethod
     def _handle_user_resources(update):
@@ -52,6 +81,8 @@ class MsgHandlers:
         if not Users.getUserStock(update.message.from_user.username, user_stock, unknown_res_names):
             update.message.reply_text(env.get_template('nostock.txt').render())
             return
+
+        subtract(unknown_res_names, Config.ignore_not_found_resources)
 
         if len(unknown_res_names) != 0:
             update.message.reply_text(env.get_template('noresourcesinfo.txt').render(unknown_res_names=unknown_res_names))
@@ -110,57 +141,38 @@ class MsgHandlers:
         update.message.reply_text(u'Стоимость вашего /stock = ' + str(cost))
 
     @staticmethod
+    def getCraftList(bot, update):
+        weapon_list, intermediate_list = MsgHandlers.recipes.list_all()
+        bot.sendMessage(chat_id=update.message.chat_id,
+                        text=env.get_template('craft_list.txt').render(weapon_list=weapon_list, intermediate_list=intermediate_list, map_id=MsgHandlers.recipes_name_to_id_map))
+
+
+    @staticmethod
     def getCraftRecipes(bot, update):
-        recipe_item = update.message.text.split(' ')[1:]
-        recipe_item = ' '.join(recipe_item)
+        recipe_item_id = int(update.message.text.split('_')[1])
+        recipe_item, unused = find_dict(MsgHandlers.recipes_name_to_id_map, lambda k, v: v == recipe_item_id)
 
-        # just `/craft` command
-        if len(recipe_item) == 0:
-            weapon_list, intermediate_list = MsgHandlers.recipes.list_all()
-            rpl = "Доступный крафт (снаряжение):\n"
-            for w in weapon_list:
-                weap_str = f"{w[0]} ("
-                if 'attack' in w[1]['stat']:
-                    weap_str += f"⚔️{w[1]['stat']['attack']}"
-                if 'def' in w[1]['stat']:
-                    weap_str += f"🛡️{w[1]['stat']['def']}"
-                weap_str += ") "
-                weap_str += f"`/craft {w[0]}`\n"
-                rpl += weap_str
+        # /craft_<itemid> command
+        user_stock, unknown_res_names = MsgHandlers._handle_user_resources(update)
+        if user_stock is None:
+            return
 
-            rpl += "\nДоступный крафт (промежуточные ресурсы)\n"
-            for i in intermediate_list:
-                rpl += i + "\n"
+        #transform user stock to Counter-like container
+        user_stock_counted = {}
+        for res, props in user_stock.items():
+            user_stock_counted[res] = props['count']
+        try:
+            need_prim_resources, need_base_resources = MsgHandlers.recipes.calc_recipe_for_user(recipe_item, user_stock_counted)
+        except Exception:
+            update.message.reply_text(f"Ресурса \"{recipe_item}\" не существует.")
+            return
 
-            update.message.reply_text(rpl)
-        # /craft <itemname> command
-        else:
-            user_stock, unknown_res_names = MsgHandlers._handle_user_resources(update)
-            if user_stock is None:
-                return
-
-            #transform user stock to Counter-like container
-            user_stock_counted = {}
-            for res, props in user_stock.items():
-                user_stock_counted[res] = props['count']
-            try:
-                need_prim_resources, need_base_resources = MsgHandlers.recipes.calc_recipe_for_user(recipe_item, user_stock_counted)
-            except Exception:
-                update.message.reply_text(f"Ресурса \"{recipe_item}\" не существует.")
-                return
-
-            rpl = ''
-            rpl += "Требуется ресурсов для крафта:\n" \
-                   "Имя ресура: (осталось добыть / требуется всего)\n"
-            for res, props in need_prim_resources.items():
-                rpl += f"{res}: ({props['need']} / {props['count']})\n"
-
-            rpl += "\nИли требуется __базовых__ ресурсов для крафта:\n" \
-                   "Имя ресура: (осталось добыть / требуется всего)\n"
-            for res, props in need_base_resources.items():
-                rpl += f"{res}: ({props['need']} / {props['count']})\n"
-
-            update.message.reply_text(rpl)
+        bot.sendMessage(chat_id=update.message.chat_id,
+                        parse_mode='Markdown',
+                        text=env.get_template('craft_item.txt').render(recipe_item=recipe_item,
+                                                                       need_prim_resources=need_prim_resources,
+                                                                       need_base_resources=need_base_resources,
+                                                                       map_id=MsgHandlers.recipes_name_to_id_map))
 
 
 

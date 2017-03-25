@@ -47,8 +47,16 @@ def main():
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler("start", MsgHandlers.intro))
     dp.add_handler(CommandHandler("help", MsgHandlers.intro))
-    dp.add_handler(CommandHandler("craft", MsgHandlers.getCraftRecipes))
-    dp.add_handler(CommandHandler("cost", MsgHandlers.calcCost))
+    #main menu
+    dp.add_handler(RegexHandler("Крафт", MsgHandlers.showCraftMenu))
+    dp.add_handler(RegexHandler("Гайды", MsgHandlers.showGuidesMenu))
+    dp.add_handler(RegexHandler("Стата", MsgHandlers.showStatMenu))
+
+    #craft menu
+    dp.add_handler(RegexHandler("Список рецептов", MsgHandlers.getCraftList))
+    dp.add_handler(RegexHandler("^/craft_.+", MsgHandlers.getCraftRecipes))
+    dp.add_handler(RegexHandler("Расчет стоимости /stock", MsgHandlers.calcCost))
+    dp.add_handler(RegexHandler("Главное меню", MsgHandlers.intro))
 
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text , MsgHandlers.plainMessage))

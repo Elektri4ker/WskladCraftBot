@@ -10,7 +10,6 @@ class Stock:
     def __init__(self, stock_parser = StockParser()):
         self.stock_parser = stock_parser
 
-
     def processMessageFromDwarfs(self, tg_message, resources, new_resources, updated_resources):
         #is it actually from the right bot?
         if not tg_message.forward_from or tg_message.forward_from.username != Config.cw_bot_username:
