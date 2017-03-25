@@ -1,0 +1,9 @@
+Доступный крафт (снаряжение):
+{% for w in weapon_list %}
+{{w[0]}} ({% if w[1]['stat']['attack'] %}⚔{{w[1]['stat']['attack']}}{% endif %}  {% if w[1]['stat']['def'] %}🛡{{w[1]['stat']['def']}}{% endif %}) -> /craft_{{map_id[w[0]]}}
+{% endfor %}
+
+Доступный крафт (промежуточные ресурсы):
+{% for i in intermediate_list %}
+{{i}} -> /craft_{{map_id[i]}}
+{% endfor %}

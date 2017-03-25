@@ -1,0 +1,15 @@
+Ура! Склад обновлен!
+
+{% if new_resources %}
+Вы нашли *новые ресурсы*:
+{% for res in new_resources %}
+    {{res}}
+{% endfor %}
+{% endif %}
+
+{% if updated_resources %}
+Вы нашли информацию о *новых ценах* на следующие ресурсы:
+{% for res in updated_resources %}
+    {{res}}
+{% endfor %}
+{% endif %}

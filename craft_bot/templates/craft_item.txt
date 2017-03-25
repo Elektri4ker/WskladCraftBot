@@ -1,0 +1,15 @@
+{% if need_prim_resources %}
+Для крафта *{{recipe_item}}* необходимо скрафтить:
+Имя ресура: (осталось скрафтить / требуется всего)
+{% for res, props in need_prim_resources.items() %}
+    {{res}}: ({{props['need']}} / {{props['count']}}) {% if props['need'] == 0 %}*Этого ресурса уже достаточно!*{% else %}-> /craft\_{{map_id[res]}} {% endif %}.
+{% endfor %}
+{% endif %}
+
+{% if need_base_resources %}
+Для крафта *{{recipe_item}}* необходимо добыть *базовых ресурсов*:
+Имя ресура: (осталось добыть / требуется всего)
+{% for res, props in need_base_resources.items() %}
+    {{res}}: ({{props['need']}} / {{props['count']}}) {% if props['need'] == 0 %}*Этого ресурса уже достаточно!*{% endif %}.
+{% endfor %}
+{% endif %}

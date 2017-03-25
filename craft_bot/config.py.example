@@ -15,3 +15,9 @@ class Config:
     u'Кость': u'Кость животного',
     u'Метал.волокно': u'Металлическое волокно'
     }
+
+    #this resources are not listed in dwarf's messages but listed in
+    #/stock messages, so it leads to repeated marking them as `not_found_resources`
+    ignore_not_found_resources = {
+        '🏷👒 Дамская шляпка'
+    }
