@@ -10,7 +10,7 @@ class Resources(DataBaseProxy):
     @staticmethod
     def resetResource(name, cost):
         res = DataBaseProxy.db.Resources.find_one({'name': name})
-        print(res)
+
         if not res:
             DataBaseProxy.db.Resources.insert_one({'name': name, 'cost': cost})
             return 2

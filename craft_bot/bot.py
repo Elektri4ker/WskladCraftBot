@@ -13,7 +13,7 @@ Press Ctrl-C on the command line or send a signal to the process to stop the
 bot.
 """
 
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
+from telegram.ext import Updater, CommandHandler, MessageHandler, RegexHandler, Filters
 import logging
 from pymongo import MongoClient
 
@@ -30,17 +30,6 @@ logger = logging.getLogger(__name__)
 
 # Define a few command handlers. These usually take the two arguments bot and
 # update. Error handlers also receive the raised TelegramError object in error.
-def start(bot, update):
-    update.message.reply_text('Hi!')
-
-
-def help(bot, update):
-    update.message.reply_text('Help!')
-
-
-def echo(bot, update):
-    print(update.message.forward_from.username)
-
 
 def error(bot, update, error):
     logger.warn('Update "%s" caused error "%s"' % (update, error))
@@ -56,13 +45,13 @@ def main():
     dp = updater.dispatcher
 
     # on different commands - answer in Telegram
-    dp.add_handler(CommandHandler("start", start))
-    dp.add_handler(CommandHandler("help", help))
+    dp.add_handler(CommandHandler("start", MsgHandlers.intro))
+    dp.add_handler(CommandHandler("help", MsgHandlers.intro))
     dp.add_handler(CommandHandler("craft", MsgHandlers.getCraftRecipes))
     dp.add_handler(CommandHandler("cost", MsgHandlers.calcCost))
 
     # on noncommand i.e message - echo the message on Telegram
-    dp.add_handler(MessageHandler(Filters.text, MsgHandlers.plainMessage))
+    dp.add_handler(MessageHandler(Filters.text , MsgHandlers.plainMessage))
 
     # log all errors
     dp.add_error_handler(error)

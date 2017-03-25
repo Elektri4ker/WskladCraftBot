@@ -45,7 +45,7 @@ class Stock:
 
         for res, props in found_resources.items():
             res_stored = Resources.getResource(res)
-            if res_stored is None:
+            if res_stored is None and res not in Config.ignore_not_found_resources:
                 not_found_resources_names.append(res)
 
             resources[res] = props

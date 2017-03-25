@@ -5,15 +5,44 @@ from stock import Stock
 from recipes import Recipes
 from database_proxy import *
 
+from jinja2 import Environment, PackageLoader, select_autoescape
+
+env = Environment(
+    loader=PackageLoader('craft_bot', 'templates'),
+    trim_blocks = True,
+    lstrip_blocks = True
+)
 
 class MsgHandlers:
     recipes = None
     stock = None
+    keyboard_markups = None
+
 
     @staticmethod
     def initialize():
         MsgHandlers.stock = Stock()
         MsgHandlers.recipes = Recipes(Config.recipes_file)
+
+        MsgHandlers.keyboard_markups = {
+            "main_menu": {
+                "keyboard": [["Гайды"], ["Крафт"], ["Стата"]],
+                "resize_keyboard": True
+            },
+
+            "craft_menu": {
+                "keyboard": [["Расчет стоимости /stock"], ["Список рецептов"], ["Главное меню"]],
+                "resize_keyboard": True
+            }
+        }
+
+    @staticmethod
+    def intro(bot, update):
+        keyboard_markup = {'keyboard': [["123"], ["456"]], 'resize_keyboard': True}
+        bot.sendMessage(chat_id=update.message.chat_id,
+                        parse_mode='Markdown',
+                        text=env.get_template('intro.txt').render(),
+                        reply_markup=MsgHandlers.keyboard_markups["main_menu"])
 
     @staticmethod
     def _handle_user_resources(update):
@@ -21,17 +50,11 @@ class MsgHandlers:
         unknown_res_names = []
 
         if not Users.getUserStock(update.message.from_user.username, user_stock, unknown_res_names):
-            update.message.reply_text('Вы еще не отправили свой /stock')
+            update.message.reply_text(env.get_template('nostock.txt').render())
             return
 
         if len(unknown_res_names) != 0:
-            str_res = ""
-            for res in unknown_res_names:
-                str_res += res + '\n'
-            rpl = u'У нас нет информации о стоимости следующих ресурсов:\n' + \
-                  str_res + \
-                  u'Вы можете переслать сообщение от скупщика ресурсов, чтобы добавить цены в нашу базу!'
-            update.message.reply_text(rpl)
+            update.message.reply_text(env.get_template('noresourcesinfo.txt').render(unknown_res_names=unknown_res_names))
 
         return user_stock, unknown_res_names
 
@@ -48,20 +71,10 @@ class MsgHandlers:
                     del props['cost']
 
             Users.resetUserStock(update.message.from_user.username, resources)
-            update.message.reply_text('Ура! Склад обновлен!')
 
-            if len(new_resources) != 0:
-                str_res = ""
-                for res in new_resources:
-                    str_res += res + '\n'
-                bot.sendMessage(update.message.chat_id, u'Вы нашли новые ресурсы:\n' + str_res)
-
-            if len(updated_resources) != 0:
-                str_res = ""
-                for res in updated_resources:
-                    str_res += res + '\n'
-                bot.sendMessage(update.message.chat_id,
-                                u'Вы нашли информацию о новых ценах на следующие ресурсы:\n' + str_res)
+            bot.sendMessage(chat_id=update.message.chat_id,
+                            parse_mode='Markdown',
+                            text=env.get_template('sklad_updated.txt').render(new_resources=new_resources, updated_resources=updated_resources))
 
             return
 
@@ -75,18 +88,14 @@ class MsgHandlers:
                     del props['cost']
 
             Users.resetUserStock(update.message.from_user.username, resources)
-            update.message.reply_text('Ура! Склад обновлен!')
+            bot.sendMessage(chat_id=update.message.chat_id,
+                            parse_mode='Markdown',
+                            text=env.get_template('sklad_updated.txt').render())
 
             if len(not_found_resources_names) != 0:
-                str_res = ""
-                for res in not_found_resources_names:
-                    str_res += res + '\n'
-
-                rpl = u'У нас нет информации о стоимости следующих ресурсов:\n' + \
-                      str_res + \
-                      u'Вы можете переслать сообщение от скупщика ресурсов, чтобы добавить цены в нашу базу!'
-
-                update.message.reply_text(rpl)
+                bot.sendMessage(chat_id=update.message.chat_id,
+                                parse_mode='Markdown',
+                                text=env.get_template('noresourcesinfo.txt').render(unknown_res_names=not_found_resources_names))
 
             return
 
@@ -95,7 +104,8 @@ class MsgHandlers:
     @staticmethod
     def calcCost(bot, update):
         user_stock, unknown_res_names = MsgHandlers._handle_user_resources(update)
-
+        if user_stock is None:
+            return
         cost = Users.calcStockCost(user_stock)
         update.message.reply_text(u'Стоимость вашего /stock = ' + str(cost))
 
@@ -114,7 +124,8 @@ class MsgHandlers:
                     weap_str += f"⚔️{w[1]['stat']['attack']}"
                 if 'def' in w[1]['stat']:
                     weap_str += f"🛡️{w[1]['stat']['def']}"
-                weap_str += ")\n"
+                weap_str += ") "
+                weap_str += f"`/craft {w[0]}`\n"
                 rpl += weap_str
 
             rpl += "\nДоступный крафт (промежуточные ресурсы)\n"
@@ -125,6 +136,8 @@ class MsgHandlers:
         # /craft <itemname> command
         else:
             user_stock, unknown_res_names = MsgHandlers._handle_user_resources(update)
+            if user_stock is None:
+                return
 
             #transform user stock to Counter-like container
             user_stock_counted = {}
