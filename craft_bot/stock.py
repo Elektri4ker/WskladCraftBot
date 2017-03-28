@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
 from config import Config
-from stock_parser import *
+from message_parser import *
 from database_proxy import *
 from telegram.ext import Updater
 
 class Stock:
 
-    def __init__(self, stock_parser = StockParser()):
+    def __init__(self, stock_parser = MessageParser()):
         self.stock_parser = stock_parser
 
     def processMessageFromDwarfs(self, tg_message, resources, new_resources, updated_resources):
