@@ -13,7 +13,7 @@ Press Ctrl-C on the command line or send a signal to the process to stop the
 bot.
 """
 
-from telegram.ext import Updater, CommandHandler, MessageHandler, RegexHandler, Filters
+from telegram.ext import Updater, CommandHandler, MessageHandler, CallbackQueryHandler, RegexHandler, Filters
 import logging
 from pymongo import MongoClient
 
@@ -48,18 +48,19 @@ def main():
     dp.add_handler(CommandHandler("start", MsgHandlers.intro))
     dp.add_handler(CommandHandler("help", MsgHandlers.intro))
     #main menu
-    dp.add_handler(RegexHandler("Крафт", MsgHandlers.showCraftMenu))
-    dp.add_handler(RegexHandler("Гайды", MsgHandlers.showGuidesMenu))
-    dp.add_handler(RegexHandler("Стата", MsgHandlers.showStatMenu))
+    #dp.add_handler(RegexHandler("Крафт", MsgHandlers.showCraftMenu))
+    dp.add_handler(CallbackQueryHandler(callback=MsgHandlers.showGuidesMenu))
+    #dp.add_handler(RegexHandler("Гайды", MsgHandlers.showGuidesMenu))
+    #dp.add_handler(RegexHandler("Стата", MsgHandlers.showStatMenu))
 
     #craft menu
-    dp.add_handler(RegexHandler("Список рецептов", MsgHandlers.getCraftList))
-    dp.add_handler(RegexHandler("^/craft_.+", MsgHandlers.getCraftRecipes))
-    dp.add_handler(RegexHandler("Расчет стоимости /stock", MsgHandlers.calcCost))
-    dp.add_handler(RegexHandler("Главное меню", MsgHandlers.intro))
+    # dp.add_handler(RegexHandler("Список рецептов", MsgHandlers.getCraftList))
+    # dp.add_handler(RegexHandler("^/craft_.+", MsgHandlers.getCraftRecipes))
+    # dp.add_handler(RegexHandler("Расчет стоимости /stock", MsgHandlers.calcCost))
+    # dp.add_handler(RegexHandler("Главное меню", MsgHandlers.intro))
 
     # on noncommand i.e message - echo the message on Telegram
-    dp.add_handler(MessageHandler(Filters.text , MsgHandlers.plainMessage))
+    # dp.add_handler(MessageHandler(Filters.text , MsgHandlers.plainMessage))
 
     # log all errors
     dp.add_error_handler(error)
