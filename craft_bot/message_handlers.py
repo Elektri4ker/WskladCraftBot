@@ -57,18 +57,38 @@ class MsgHandlers:
         }
 
     @staticmethod
+    def get_main_menu_markup(user_first):
+        keyboard = [["Гайды"], ["Крафт"]]
+        if user_first:
+            keyboard.append(["Эй, парень, не хочешь немножко квеста? =)"])
+        else:
+            keyboard.append(["Ваш профиль"])
+
+        return {
+            "keyboard": keyboard,
+            "resize_keyboard": True }
+
+
+    @staticmethod
+    def get_user_menu_markup():
+        keyboard = [["Регистрация на конкурс"], ["Помощь"], ["Ваши достижения"]]
+        return {
+            "keyboard": keyboard,
+            "resize_keyboard": True}
+
+
+    @staticmethod
     def intro(bot, update):
         bot.sendMessage(chat_id=update.message.chat_id,
                         parse_mode='Markdown',
                         text=env.get_template('intro.txt').render(),
-                        reply_markup=InlineKeyboardMarkup(MsgHandlers.inline_keyboards["main_menu"]))
+                        reply_markup=MsgHandlers.get_main_menu_markup(True))
 
     @staticmethod
     def showCraftMenu(bot, update):
         bot.sendMessage(chat_id=update.message.chat_id,
                         parse_mode='Markdown',
-                        text=env.get_template('craft_menu.txt').render(),
-                        reply_markup=MsgHandlers.keyboard_markups["craft_menu"])
+                        text=env.get_template('craft_menu.txt').render())
 
     @staticmethod
     def showGuidesMenu(bot, update):
@@ -77,9 +97,17 @@ class MsgHandlers:
                         text=env.get_template('guides_menu.txt').render())
 
     @staticmethod
-    def showStatMenu(bot, update):
+    def showUserProfileFirst(bot, update):
         bot.sendMessage(chat_id=update.message.chat_id,
                         parse_mode='Markdown',
-                        text=env.get_template('stat_menu.txt').render())
+                        text=env.get_template('user_profile_first.txt').render())
+
+    @staticmethod
+    def showUserProfile(bot, update):
+        bot.sendMessage(chat_id=update.message.chat_id,
+                        parse_mode='Markdown',
+                        text=env.get_template('user_profile.txt').render(),
+                        reply_markup=MsgHandlers.get_user_menu_markup())
+
 
 

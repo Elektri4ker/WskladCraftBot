@@ -48,10 +48,10 @@ def main():
     dp.add_handler(CommandHandler("start", MsgHandlers.intro))
     dp.add_handler(CommandHandler("help", MsgHandlers.intro))
     #main menu
-    #dp.add_handler(RegexHandler("Крафт", MsgHandlers.showCraftMenu))
-    dp.add_handler(CallbackQueryHandler(callback=MsgHandlers.showGuidesMenu))
-    #dp.add_handler(RegexHandler("Гайды", MsgHandlers.showGuidesMenu))
-    #dp.add_handler(RegexHandler("Стата", MsgHandlers.showStatMenu))
+    dp.add_handler(RegexHandler("Крафт", MsgHandlers.showCraftMenu))
+    dp.add_handler(RegexHandler("Гайды", MsgHandlers.showGuidesMenu))
+    dp.add_handler(RegexHandler("Эй, парень, не хочешь немножко квеста? =)", MsgHandlers.showUserProfileFirst))
+    dp.add_handler(RegexHandler("Ваш профиль", MsgHandlers.showUserProfile))
 
     #craft menu
     # dp.add_handler(RegexHandler("Список рецептов", MsgHandlers.getCraftList))
