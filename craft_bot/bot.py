@@ -50,7 +50,7 @@ def main():
     #main menu
     dp.add_handler(RegexHandler("Крафт", MsgHandlers.showCraftMenu))
     dp.add_handler(RegexHandler("Гайды", MsgHandlers.showGuidesMenu))
-    dp.add_handler(RegexHandler("Эй, парень, не хочешь немножко квеста? =)", MsgHandlers.showUserProfileFirst))
+    dp.add_handler(RegexHandler("Может быть, немножко квестов\? =\)", MsgHandlers.showUserProfileFirst))
     dp.add_handler(RegexHandler("Ваш профиль", MsgHandlers.showUserProfile))
 
     #craft menu

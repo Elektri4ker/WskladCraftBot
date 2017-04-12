@@ -60,7 +60,7 @@ class MsgHandlers:
     def get_main_menu_markup(user_first):
         keyboard = [["Гайды"], ["Крафт"]]
         if user_first:
-            keyboard.append(["Эй, парень, не хочешь немножко квеста? =)"])
+            keyboard.append(["Может быть, немножко квестов? =)"])
         else:
             keyboard.append(["Ваш профиль"])
 

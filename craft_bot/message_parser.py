@@ -55,6 +55,9 @@ class MessageParser:
 
         return found_resources
 
+    def parseGerojMessage(self):
+        
+
     def parseQuestMessage(self, text, timestamp):
         quest_descriptor = {}
         yield_res = {}
