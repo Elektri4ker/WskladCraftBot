@@ -15,3 +15,13 @@ class User(Document):
 
 class QuestDescriptor(Document):
     id = LongField(unique=True, primary_key=True, required=True)
+    message_id = LongField()
+
+    type = StringField()
+
+    text_id = LongField()
+    text = StringField()
+
+    meta = {
+        'indexes': ['message_id']
+    }
