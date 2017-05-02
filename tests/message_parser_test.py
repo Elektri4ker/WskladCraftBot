@@ -87,6 +87,35 @@ class StockParserTest(unittest.TestCase):
 
         self.message_parser.parseQuestMessage(msg, datetime.now)
 
+    def test_parseGeroyMessage(self):
+        msg = ( "Битва пяти замков через 3ч 52 минуты!\n"
+                "\n"
+                "🇲🇴Fywa Prolge, Добытчик Мятного замка\n"
+                "🏅Уровень: 38\n"
+                "⚔️Атака: 52 🛡Защита: 35\n"
+                "🔥Опыт: 141107/154685\n"
+                "🔋Выносливость: 1/8\n"
+                "💰75 💠2\n"
+                "\n"
+                "🎽Экипировка +25⚔️+40🛡+1🍀+6⛏\n"
+                "🎒Рюкзак: 14/15 /inv\n"
+                "\n"
+                "Состояние:\n"
+                "🕸В пещере. Вернешься через несколько секунд\n"
+                "\n"
+                "Подробнее: /hero\n")
+
+        geroy_desc = self.message_parser.parseGerojMessage(msg, 11)
+
+        self.assertEqual(geroy_desc['fraction'], '🇲🇴')
+        self.assertEqual(geroy_desc['name'], 'Fywa Prolge')
+        self.assertEqual(geroy_desc['prof'], 'Добытчик')
+        self.assertEqual(geroy_desc['level'], '38')
+        self.assertEqual(geroy_desc['attack'], '52')
+        self.assertEqual(geroy_desc['def'], '35')
+        self.assertEqual(geroy_desc['mining_cap'], '6')
+        self.assertEqual(geroy_desc['lucky'], '1')
+
 
 if __name__ == '__main__':
     unittest.main()

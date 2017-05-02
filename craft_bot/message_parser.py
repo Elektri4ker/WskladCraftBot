@@ -18,6 +18,16 @@ class MessageParser:
         self.yield_exp_parser = re.compile(r'\s*(\d+) опыт\W*\s*')
         self.yield_gold_parser = re.compile(r'\s+(\d+) золот\W* монет')
 
+        #Geroy patterns
+        self.geroy_name_parser = re.compile(r'\s(..)(.+),\s(.+)\s.+замка')
+        self.geroy_level_parser = re.compile(r'Уровень:\s(\d+)')
+        self.geroy_combat_parser = re.compile(r'Атака:\s(\d+).+Защита:\s(\d+)')
+        self.geroy_exp_parser = re.compile(r'Опыт:\s(\d+)/(\d+)')
+        self.geroy_stamina_parser = re.compile(r'Выносливость:\s(\d+)/(\d+)')
+        self.geroy_mining_cap_parser = re.compile(r'\+(\d+)⛏')
+        self.geroy_lucky_parser = re.compile(r'\+(\d+)🍀')
+
+
     def parseMessageFromDwarfs(self, text):
 
         entries = text.split("\n")
@@ -55,7 +65,43 @@ class MessageParser:
 
         return found_resources
 
-    def parseGerojMessage(self):
+    def parseGerojMessage(self, text, timestamp):
+        geroy_descriptor = {}
+
+        geroy_descriptor['timestamp'] = timestamp
+
+        # m = self.geroy_name_parser.match(text)
+        # if m is None:
+        #     return {}
+        # geroy_descriptor['fraction'] = m.group(1)
+        # geroy_descriptor['name'] = m.group(2)
+        # geroy_descriptor['prof'] = m.group(3)
+
+        m = self.geroy_level_parser.match(text)
+        if m is None:
+            return {}
+        geroy_descriptor['level'] = m.group(1)
+
+        m = self.geroy_combat_parser.match(text)
+        if m is None:
+            return {}
+        geroy_descriptor['attack'] = m.group(1)
+        geroy_descriptor['def'] = m.group(2)
+
+        m = self.geroy_mining_cap_parser.match(text)
+        if m is not None:
+            geroy_descriptor['mining_cap'] = m.group(1)
+
+        m = self.geroy_lucky_parser.match(text)
+        if m is not None:
+            geroy_descriptor['lucky'] = m.group(1)
+
+        return geroy_descriptor
+
+
+
+
+
         
 
     def parseQuestMessage(self, text, timestamp):
