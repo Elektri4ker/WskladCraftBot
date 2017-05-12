@@ -53,6 +53,12 @@ def main():
     dp.add_handler(RegexHandler("Может быть, немножко квестов\? =\)", MsgHandlers.showUserProfileFirst))
     dp.add_handler(RegexHandler("Ваш профиль", MsgHandlers.showUserProfile))
 
+    #handlers for messages from game
+    dp.add_handler(RegexHandler("Битва семи замков", MsgHandlers.handleGeroyRepost))
+
+    #try to parse other messages from the Game
+    dp.add_handler(MessageHandler(Filters.all, MsgHandlers.handleOtherGameMessages))
+
     #craft menu
     # dp.add_handler(RegexHandler("Список рецептов", MsgHandlers.getCraftList))
     # dp.add_handler(RegexHandler("^/craft_.+", MsgHandlers.getCraftRecipes))

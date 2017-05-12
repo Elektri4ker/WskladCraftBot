@@ -70,29 +70,30 @@ class MessageParser:
 
         geroy_descriptor['timestamp'] = timestamp
 
-        # m = self.geroy_name_parser.match(text)
-        # if m is None:
-        #     return {}
-        # geroy_descriptor['fraction'] = m.group(1)
-        # geroy_descriptor['name'] = m.group(2)
-        # geroy_descriptor['prof'] = m.group(3)
 
-        m = self.geroy_level_parser.match(text)
+        m = self.geroy_name_parser.search(text)
+        if m is None:
+            return {}
+        geroy_descriptor['fraction'] = m.group(1)
+        geroy_descriptor['name'] = m.group(2)
+        geroy_descriptor['prof'] = m.group(3)
+
+        m = self.geroy_level_parser.search(text)
         if m is None:
             return {}
         geroy_descriptor['level'] = m.group(1)
 
-        m = self.geroy_combat_parser.match(text)
+        m = self.geroy_combat_parser.search(text)
         if m is None:
             return {}
         geroy_descriptor['attack'] = m.group(1)
         geroy_descriptor['def'] = m.group(2)
 
-        m = self.geroy_mining_cap_parser.match(text)
+        m = self.geroy_mining_cap_parser.search(text)
         if m is not None:
             geroy_descriptor['mining_cap'] = m.group(1)
 
-        m = self.geroy_lucky_parser.match(text)
+        m = self.geroy_lucky_parser.search(text)
         if m is not None:
             geroy_descriptor['lucky'] = m.group(1)
 
