@@ -14,9 +14,9 @@ class MessageParser:
         #Шкура животного (5)
         self.simple_parser = re.compile(r'^(.+)\s\((\d+)\)')
 
-        self.yield_res_parser = re.compile(r'Получено:\s*(\W*)\((\d+)')
-        self.yield_exp_parser = re.compile(r'\s*(\d+) опыт\W*\s*')
-        self.yield_gold_parser = re.compile(r'\s+(\d+) золот\W* монет')
+        self.yield_res_parser = re.compile(r'Получено:\s*(.+)\s*\((\d+)')
+        self.yield_exp_parser = re.compile(r'\s+(\d+)\s+опыт')
+        self.yield_gold_parser = re.compile(r'\s+(\d+)\s+золот.+монет')
 
         #Geroy patterns
         self.geroy_name_parser = re.compile(r'\s(..)(.+),\s(.+)\s.+замка')
@@ -112,12 +112,13 @@ class MessageParser:
 
         # fill in resource yield
         for line in lines:
-            m = self.yield_res_parser.match(line)
+            m = self.yield_res_parser.search(line)
             if not m or len(m.groups()) != 2:
                 continue
 
             res_name = m.group(1)
             res_count = int(m.group(2))
+            res_name = res_name.replace('.', '_') # replace dots by underscores for mongodb.
             yield_res[res_name] = res_count
 
             is_quest_message = True
@@ -128,14 +129,21 @@ class MessageParser:
             if 'Ты заработал:' not in line:
                 continue
 
-            m_exp = self.yield_exp_parser.match(line)
-            m_gold = self.yield_gold_parser.match(line)
+            m_exp = self.yield_exp_parser.search(line)
+            m_gold = self.yield_gold_parser.search(line)
 
             if m_exp:
                 yield_exp = m_exp.group(1)
             if m_gold:
                 yield_gold = m_gold.group(1)
 
+            is_quest_message = True
+            used_lines.append(line)
+
+        #remove line with monster
+        for line in lines:
+            if '/fight_' not in line:
+                continue
             is_quest_message = True
             used_lines.append(line)
 
@@ -155,6 +163,15 @@ class MessageParser:
         quest_descriptor['residual_text'] = residual_text
 
         return quest_descriptor
+
+    def parseQuestTypeMessage(self, text):
+        if "🕸Пещера" in text or "Ты отправился искать приключения в пещеру" in text:
+            return 'cave'
+        if "🌲Лес" in text or "Ты отправился искать приключения в лес" in text:
+            return 'forest'
+        if "🐫ГРАБИТЬ КОРОВАНЫ" in text or "Ты отправился грабить КОРОВАНЫ" in text:
+            return 'corovan'
+
 
 
 

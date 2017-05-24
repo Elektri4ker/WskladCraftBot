@@ -87,7 +87,7 @@ class MsgHandlers:
 
     @staticmethod
     def intro(bot, update):
-        user_exists = User.objects(username=update.message.from_user.username) is not None
+        user_exists = len(User.objects(username=update.message.from_user.username)) > 0
 
         bot.sendMessage(chat_id=update.message.chat_id,
                         parse_mode='Markdown',
@@ -163,6 +163,7 @@ class MsgHandlers:
 
         if quest_desc_doc.find_the_same():
             update.message.reply_text("Сорян, но именно этот форвард уже есть у нас в базе =(")
+            return
 
         quest_desc_doc.save(force_insert=True)
 
