@@ -100,11 +100,6 @@ class MessageParser:
         return geroy_descriptor
 
 
-
-
-
-        
-
     def parseQuestMessage(self, text, timestamp):
         quest_descriptor = {}
         yield_res = {}

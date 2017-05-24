@@ -143,25 +143,26 @@ class MsgHandlers:
 
     @staticmethod
     def processQuestDescriptor(bot, update, quest_dict):
-        if QuestDescriptor.objects(message_id=update.message.forward_from_message_id) is not None:
-            update.message.reply_text("Сорян, но именно этот форвард уже есть у нас в базе =(")
 
         text_id = None
         text = None
 
         quest_text_doc = QuestText.objects(text=quest_dict['residual_text'])
-        if quest_text_doc is None:
+        if not quest_text_doc:
             text = quest_dict['residual_text']
         else:
             text_id = quest_text_doc.id
 
-        quest_desc_doc = QuestDescriptor(message_id=update.message.forward_from_message_id,
+        quest_desc_doc = QuestDescriptor(timestamp=update.message.forward_date,
                         yield_res=quest_dict.get('yield_res'),
                         yield_exp=quest_dict.get('yield_exp'),
                         yield_gold=quest_dict.get('yield_gold'),
                         text=text,
                         text_id=text_id
                         )
+
+        if quest_desc_doc.find_the_same():
+            update.message.reply_text("Сорян, но именно этот форвард уже есть у нас в базе =(")
 
         quest_desc_doc.save(force_insert=True)
 
