@@ -136,7 +136,7 @@ class MsgHandlers:
         if geroj_desc == {}:
             return
 
-        User.objects(username=update.message.from_user.username).update_one(upsert=True, cw_geroj_info=geroj_desc)
+        User.objects(username=update.message.from_user.username, tg_user_id=update.message.from_user.id).update_one(upsert=True, cw_geroj_info=geroj_desc)
 
         update.message.reply_text("Вы зарегистрировали ваш профиль!")
         MsgHandlers.showUserProfile(bot, update)
@@ -144,15 +144,17 @@ class MsgHandlers:
     @staticmethod
     def processQuestDescriptor(bot, update, quest_dict):
 
-        text_id = None
+        text_id = 0
         text = None
 
+        #connect quest to text id or write text inplace, if no such text in the database
         quest_text_doc = QuestText.objects(text=quest_dict['residual_text'])
         if not quest_text_doc:
             text = quest_dict['residual_text']
         else:
             text_id = quest_text_doc.id
 
+        #creating new quest in the db
         quest_desc_doc = QuestDescriptor(timestamp=update.message.forward_date,
                         yield_res=quest_dict.get('yield_res'),
                         yield_exp=quest_dict.get('yield_exp'),
@@ -161,19 +163,78 @@ class MsgHandlers:
                         text_id=text_id
                         )
 
+        #validating for uniquity
         if quest_desc_doc.find_the_same():
             update.message.reply_text("Сорян, но именно этот форвард уже есть у нас в базе =(")
             return
 
+        #selecting user from the db
+        user_doc = User.objects(tg_user_id=update.message.from_user.id).first()
+        if not user_doc:
+            update.message.reply_text("Вы еще не зарегистрировались")
+            return
+
         quest_desc_doc.save(force_insert=True)
 
+        #tieing up quest descriptor with the user.
         if text_id is None:
-            update.message.reply_text("")
+            user_doc.found_new_text_quest_ids.append(quest_desc_doc.id)
+            user_doc.save()
+            bot.sendMessage(chat_id=update.message.chat_id,
+                            parse_mode='Markdown',
+                            text=env.get_template('new_quest_message.txt').render())
+        else:
+            user_doc.quest_ids = quest_text_doc.id
+
+    @staticmethod
+    def processQuestTypeMessage(bot, update):
+        type = MsgHandlers.message_parser.parseQuestTypeMessage(update.message.text)
+        timestamp = update.message.forward_date
+        if not type:
+            return False
+
+        # selecting user from the db
+        user_doc = User.objects(tg_user_id=update.message.from_user.id)
+        if not user_doc:
+            update.message.reply_text("Вы еще не зарегистрировались")
+            return False
+
+        # find quest message 5 minutes earlier.
+        quest_docs = QuestDescriptor.objects(Q(id__in=user_doc.found_new_text_quest_ids) & Q(text_id__not__exist=True))
+        found_doc = None
+        for doc in quest_docs:
+            delta_ts = doc.timestamp - timestamp
+            if delta_ts.seconds >= 4*60+30 and delta_ts.seconds <= 5*60+30:
+                found_doc = doc
+                break
+
+        if not found_doc:
+            update.message.reply_text('На ваш форвард не нашлось подходящего сообщения...')
+        else:
+            if found_doc.text_id:
+                update.message.reply_text(f'На ваш форвард не нашлось подходящего сообщения.')
+            else:
+                text_doc = QuestText(type=type, text=found_doc.text)
+                text_doc.save()
+                found_doc.text = None
+                found_doc.text_id = text_doc.id
+                found_doc.save()
+
+        return True
+
+
+
 
 
     @staticmethod
     def handleOtherGameMessages(bot, update):
+        if update.message.forward_from.username != Config.cw_bot_username:
+            return
         print(str(update))
+
+        if MsgHandlers.processQuestTypeMessage(bot, update):
+            return
+
         quest_dict = MsgHandlers.message_parser.parseQuestMessage(update.message.text, update.message.forward_date)
         if quest_dict != {}:
             MsgHandlers.processQuestDescriptor(bot, update, quest_dict)

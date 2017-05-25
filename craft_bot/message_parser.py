@@ -99,7 +99,6 @@ class MessageParser:
 
         return geroy_descriptor
 
-
     def parseQuestMessage(self, text, timestamp):
         quest_descriptor = {}
         yield_res = {}
@@ -171,6 +170,7 @@ class MessageParser:
             return 'forest'
         if "🐫ГРАБИТЬ КОРОВАНЫ" in text or "Ты отправился грабить КОРОВАНЫ" in text:
             return 'corovan'
+        return ''
 
 
 

@@ -6,12 +6,13 @@ connect('test_database')
 class User(Document):
     # id = LongField(unique=True, primary_key=True, required=True)
     username = StringField(required=True)
+    tg_user_id = LongField(required=True, unique=True)
     cw_geroj_info = DictField()
 
     vk_link = StringField()
 
-    found_new_text_ids = ListField(LongField())
-    text_ids = ListField(LongField())
+    found_new_text_quest_ids = ListField(ObjectIdField())
+    quest_ids = ListField(ObjectIdField())
 
     achievements_ids = ListField(LongField())
 
@@ -23,7 +24,7 @@ class QuestDescriptor(Document):
     yield_exp = IntField()
     yield_gold = IntField()
 
-    text_id = LongField()
+    text_id = ObjectIdField(null=True)
     text = StringField() # Fill this only when no text_id could be get from QuestText collection
 
     meta = {
