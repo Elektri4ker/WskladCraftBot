@@ -144,15 +144,15 @@ class MsgHandlers:
     @staticmethod
     def processQuestDescriptor(bot, update, quest_dict):
 
-        text_id = 0
+        text_id = None
         text = None
 
         #connect quest to text id or write text inplace, if no such text in the database
-        quest_text_doc = QuestText.objects(text=quest_dict['residual_text'])
+        quest_text_doc = QuestText.objects(text=quest_dict['residual_text']).first()
         if not quest_text_doc:
             text = quest_dict['residual_text']
         else:
-            text_id = quest_text_doc.id
+            text_id = quest_text_doc
 
         #creating new quest in the db
         quest_desc_doc = QuestDescriptor(timestamp=update.message.forward_date,
@@ -178,13 +178,14 @@ class MsgHandlers:
 
         #tieing up quest descriptor with the user.
         if text_id is None:
-            user_doc.found_new_text_quest_ids.append(quest_desc_doc.id)
+            user_doc.found_new_text_quest_ids.append(quest_desc_doc)
             user_doc.save()
             bot.sendMessage(chat_id=update.message.chat_id,
                             parse_mode='Markdown',
                             text=env.get_template('new_quest_message.txt').render())
         else:
-            user_doc.quest_ids = quest_text_doc.id
+            user_doc.quest_ids.append(quest_desc_doc)
+            update.message.reply_text("Сообщение учтено.")
 
     @staticmethod
     def processQuestTypeMessage(bot, update):
@@ -194,17 +195,17 @@ class MsgHandlers:
             return False
 
         # selecting user from the db
-        user_doc = User.objects(tg_user_id=update.message.from_user.id)
+        user_doc = User.objects(tg_user_id=update.message.from_user.id).first()
         if not user_doc:
             update.message.reply_text("Вы еще не зарегистрировались")
             return False
 
         # find quest message 5 minutes earlier.
-        quest_docs = QuestDescriptor.objects(Q(id__in=user_doc.found_new_text_quest_ids) & Q(text_id__not__exist=True))
+        quest_docs = user_doc.found_new_text_quest_ids
         found_doc = None
         for doc in quest_docs:
             delta_ts = doc.timestamp - timestamp
-            if delta_ts.seconds >= 4*60+30 and delta_ts.seconds <= 5*60+30:
+            if delta_ts.seconds >= 4*60+30 and delta_ts.seconds <= 5*60+30 and not doc.text_id:
                 found_doc = doc
                 break
 
@@ -217,8 +218,10 @@ class MsgHandlers:
                 text_doc = QuestText(type=type, text=found_doc.text)
                 text_doc.save()
                 found_doc.text = None
-                found_doc.text_id = text_doc.id
+                found_doc.text_id = text_doc
                 found_doc.save()
+
+                update.message.reply_text(f'Спасибо! Вы нашли новый текст:\n\n{text_doc.text}\n\nВы подтвердили его, это сообщение из {text_doc.type}')
 
         return True
 
